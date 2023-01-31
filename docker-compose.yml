@@ -13,14 +13,20 @@ services:
     environment:
       - MYSQL_DATABASE=nodedb
       - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - "3306:3306"
   
   nodefc:
     container_name: nodefc
     build:
       context: ./node
+    entrypoint: dockerize -wait tcp://dbfc:3306 -timeout 30s
+    command: "node index.js"
     ports:
       - "3000:3000"
-  
+    depends_on:
+      - dbfc
+    
   nginx:
     container_name: nginxfc
     restart: always
@@ -28,5 +34,7 @@ services:
       context: ./nginx
     ports:
         - "8080:80"
+    depends_on:
+      - nodefc
 
 
